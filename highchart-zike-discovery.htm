@@ -401,8 +401,8 @@ var soul_total = getSumTotal(series_4);
           items: [{
             html: 'total score per category',
             style: {
-                left: '50px',
-                top: '18px',
+                left: '30px',
+                top: '10px',
                 color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
             }
           }]
@@ -410,7 +410,7 @@ var soul_total = getSumTotal(series_4);
 
       plotOptions: {
           spline: {
-              lineWidth: 2,
+              lineWidth: 4,
               states: {
                   hover: {
                       lineWidth: 3
@@ -421,6 +421,17 @@ var soul_total = getSumTotal(series_4);
               }
               //pointInterval: 3600000, // one hour
               //pointStart: Date.UTC(2015, 4, 31, 0, 0, 0)
+          },
+          pie: {
+              allowPointSelect: true,
+              //cursor: 'pointer',
+              dataLabels: {
+                  enabled: true,
+                  format: '{y}',
+                  style: {
+                      color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                  }
+              }
           }
       },
 
@@ -472,12 +483,10 @@ var soul_total = getSumTotal(series_4);
             y: soul_total,
             color: Highcharts.getOptions().colors[2]
         }],
-        center: [100, 80],
+        center: [80, 60],
         size: 100,
-        showInLegend: false,
-        dataLabels: {
-            enabled: false
-        }
+        showInLegend: false
+
     }
 
         ]

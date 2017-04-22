@@ -1,0 +1,500 @@
+<!--
+
+- this example multiple series withing same file
+- process each lne to correct date format  ( can do a lot more as required)
+- propose simple css , simple embedding sample
+- we have specified a crosshair meaning that we select a series data point we have s clear spot on it
+- we have specified a secondary axis
+- we defined specific axes titles and labels
+- we specified specific tooltip configuration
+
+
+info :
+1. 1rst retrieve result from the baseline project .
+2. then copy paste to another workbook the columns that you want to graphs ( include always timestamp )
+3. you may want to convert the date time ( yyyy/mm/dd hh:mm:ss ) to unix time for ease of process =(A1-DATE(1970,1,1))*86400
+4. when yuo have the outputed csv file you need to convert it to json array
+  - http://www.convertcsv.com/csv-to-json.htm
+  - step1 select the ouptuted csv
+  - step2 check if you have the first row as the column names of your dataset
+  - step5 select csv to json array
+  - hit the download result
+
+info :
+highcharts use for datetime x axis value unixtimestemp in milliseconds which equals
+to unixtimestamps * 1000 . If you dont compute such field of modified your value when
+loading the data the numbers wont be displayed correctly
+
+
+to play with foreground or background level indicate the following attribute
+within the series data
+zIndex: 2
+
+ref :http://stackoverflow.com/questions/22022179/highcharts-create-a-total-sumline-of-an-existing-serie
+-->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>
+      baseliner-chart
+    </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<style>
+
+container {
+	min-width: 400px;
+  /* max-width: 800px; */
+	height: 400px;
+	margin: 0 auto
+}
+
+</style>
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+
+<script type="text/javascript">
+
+
+//enable use of UTC (how we consider the time values to be in that format)
+Highcharts.setOptions({
+    global: {
+        useUTC: true
+    }
+});
+
+console.log("asd");
+// $.getJSON('https://api.myjson.com/bins/ylssf', function (data) {
+
+//# from local server it does not work
+//$.getJSON('http://localhost/sample-json.json', function (data) {
+
+
+
+// sample-big json (gist)
+//$.getJSON('https://gist.githubusercontent.com/truerico/cd5645d322f5f265a1aa14c78e2d628f/raw/0caf797d9b43dd0b84177627a161b8cc909aded9/sample.json', function (data) {
+
+// sample-light json (gist)
+//$.getJSON('https://gist.githubusercontent.com/truerico/d3d2f39f4244322133dc5d5e2ee2da63/raw/3b71a4cab5faff9ad053fc35de4d8713298fe06b/sample-light.json', function (data) {
+
+$.getJSON('https://gist.githubusercontent.com/truerico/9a5892f83118ddf91a7caad50d92df17/raw/b816dbd110b62f12f81a9db3e1b005e4771fbca1/zike-dataviz.json', function (data) {
+
+//$.getJSON('https://api.myjson.com/bins/1al69j', function (data) {
+
+// rf 2017-03
+// this process is used to transform the input data and clean or do whatever action e need to perform
+len = data.length,
+i = 0,
+series_1 = []; // score
+series_2 = []; // view count
+//outData2 = [];
+for (i = 0; i < len; i++) {
+    // rf 2017-03
+    // reformat the array of data so the input date is formatted as expected by highcharts
+    series_1[i] = [
+        // following command is required if the x column has iso datetime yyyy/mm/dd hh:mm:ss
+        // vs unixtimestam
+        data[i][0],
+        //Date.parse(data[i][0]),
+        data[i][9] //score
+    ];
+    series_2[i] = [
+        data[i][0],
+        //Date.parse(data[i][0]),
+        data[i][10] //view count
+    ];
+
+}
+
+
+    Highcharts.chart('container', {
+        chart: {
+            zoomType: 'x'
+        },
+        title: {
+            text: 'music discovery dataviz (1)'
+        },
+        subtitle: {
+            text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+        },
+        xAxis: {
+            // [a] following is valid only if you have unix timestamps in millisecond as your x axis otherwise choose ''
+            type: 'category',
+            // [a] - end
+            labels: {
+                // following is valid when you do not have a unix timestamps but rather an ISO DATE
+                //format: '{value:%Y-%m-%d}',
+                rotation: 45,
+                align: 'middle'
+            },
+            //crosshair : true
+            crosshair: {
+            width: 5,
+            color: '#e1e2e0'
+            }
+        },
+        yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'view count',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }, { // Secondary yAxis
+                // following two lines are to be used if values variation are very large (from small to huge number )
+                // type: 'logarithmic',
+                // minorTickInterval: 0.1,
+                title: {
+                    text: 'score',
+                    style: {
+                        color: Highcharts.getOptions().colors[0]
+                    }
+                },
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[0]
+                    }
+                },
+                opposite: true
+            }],
+        legend: {
+            //enabled: false
+            enabled: true
+        },
+        plotOptions: {
+            area: {
+                fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                marker: {
+                    radius: 2
+                },
+                lineWidth: 1,
+                states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                },
+                threshold: null
+            }
+        },
+
+        // series[].type in : area | line ( dots linked )| spline ( dots linked rounded ) | scatter ( dots no linked ) | column
+        // as you can see the first series is placed on the secondary y axis for better visibility
+        // wathc out for the series order for the z-index placement
+        series: [{
+            type: 'column',
+            name: 'view count',
+            data: series_2,
+            tooltip: {
+                        valuePrefix: '# '
+                    }
+        },{
+
+            type: 'spline',
+            yAxis: 1,
+            name: 'score',
+            data: series_1,
+
+        }]
+    });
+});
+
+
+    </script>
+
+
+
+<!-- container 2 def -->
+<script type="text/javascript">
+
+function roundToTwo(num) {
+    return +(Math.round(num + "e+2")  + "e-2");
+}
+
+
+//enable use of UTC (how we consider the time values to be in that format)
+Highcharts.setOptions({
+    global: {
+        useUTC: true
+    }
+});
+
+console.log("asd");
+// $.getJSON('https://api.myjson.com/bins/ylssf', function (data) {
+
+//# from local server it does not work
+//$.getJSON('http://localhost/sample-json.json', function (data) {
+
+
+
+// sample-big json (gist)
+//$.getJSON('https://gist.githubusercontent.com/truerico/cd5645d322f5f265a1aa14c78e2d628f/raw/0caf797d9b43dd0b84177627a161b8cc909aded9/sample.json', function (data) {
+
+// sample-light json (gist)
+//$.getJSON('https://gist.githubusercontent.com/truerico/d3d2f39f4244322133dc5d5e2ee2da63/raw/3b71a4cab5faff9ad053fc35de4d8713298fe06b/sample-light.json', function (data) {
+
+$.getJSON('https://gist.githubusercontent.com/truerico/9a5892f83118ddf91a7caad50d92df17/raw/b816dbd110b62f12f81a9db3e1b005e4771fbca1/zike-dataviz.json', function (data) {
+
+//$.getJSON('https://api.myjson.com/bins/1al69j', function (data) {
+
+// rf 2017-03
+// this process is used to transform the input data and clean or do whatever action e need to perform
+len = data.length,
+i = 0,
+series_1 = []; // total score
+series_2 = []; // energy
+series_3 = []; // melody
+series_4 = []; // soul
+series_5 = []; // avg score
+
+//outData2 = [];
+for (i = 0; i < len; i++) {
+    // rf 2017-03
+    // reformat the array of data so the input date is formatted as expected by highcharts
+    series_1[i] = [
+        // following command is required if the x column has iso datetime yyyy/mm/dd hh:mm:ss
+        // vs unixtimestam
+        data[i][0],
+        //Date.parse(data[i][0]),
+        data[i][9] // total score
+    ];
+    series_2[i] = [
+        data[i][0],
+        //Date.parse(data[i][0]),
+        data[i][6] //energy
+    ];
+    series_3[i] = [
+        data[i][0],
+        //Date.parse(data[i][0]),
+        data[i][7] //melody
+    ];
+    series_4[i] = [
+        data[i][0],
+        //Date.parse(data[i][0]),
+        data[i][8] //soul
+    ];
+
+    //avg_score = round (((data[i][6]+data[i][7]+data[i][8]) / 3) ) ;
+    avg_score = (data[i][6]+data[i][7]+data[i][8]) / 3 ;
+    avg_score = roundToTwo(avg_score);
+    //alert(avg_score);
+    series_5[i] = [
+        data[i][0],
+        //Date.parse(data[i][0]),
+        avg_score //avg score
+    ];
+
+}
+
+
+
+function getSumTotal(data) {
+    var totalList = [], total = 0;
+    for (var i = 0; i < data.length; i++) {
+        total += data[i][0,1];
+        //totalList.push(total);
+    }
+    return total;
+}
+
+
+var energy_total = getSumTotal(series_2);
+var melody_total = getSumTotal(series_3);
+var soul_total = getSumTotal(series_4);
+
+
+    Highcharts.chart('container2', {
+        chart: {
+            zoomType: 'x'
+        },
+        title: {
+            text: 'music discovery dataviz (2)'
+        },
+        subtitle: {
+            text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+        },
+        xAxis: {
+            // [a] following is valid only if you have unix timestamps in millisecond as your x axis otherwise choose ''
+            type: 'category',
+            // [a] - end
+            labels: {
+                // following is valid when you do not have a unix timestamps but rather an ISO DATE
+                //format: '{value:%Y-%m-%d}',
+                rotation: 45,
+                align: 'middle'
+            },
+            //crosshair : true
+            crosshair: {
+            width: 5,
+            color: '#e1e2e0'
+            }
+        },
+        yAxis: [{ // Primary yAxis
+                labels: {
+                    format: '{value}',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                },
+                title: {
+                    text: 'score',
+                    style: {
+                        color: Highcharts.getOptions().colors[1]
+                    }
+                }
+            }],
+        legend: {
+            //enabled: false
+            enabled: true
+        },
+        plotOptions: {
+            area: {
+                fillColor: {
+                    linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                    },
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                marker: {
+                    radius: 2
+                },
+                lineWidth: 1,
+                states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                },
+                threshold: null
+            }
+        },
+
+        labels: {
+          items: [{
+            html: 'total score per category',
+            style: {
+                left: '50px',
+                top: '18px',
+                color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+            }
+          }]
+        },
+
+      plotOptions: {
+          spline: {
+              lineWidth: 2,
+              states: {
+                  hover: {
+                      lineWidth: 3
+                  }
+              },
+              marker: {
+                  enabled: true
+              }
+              //pointInterval: 3600000, // one hour
+              //pointStart: Date.UTC(2015, 4, 31, 0, 0, 0)
+          }
+      },
+
+        // series[].type in : area | line ( dots linked )| spline ( dots linked rounded ) | scatter ( dots no linked ) | column
+        // as you can see the first series is placed on the secondary y axis for better visibility
+        // wathc out for the series order for the z-index placement
+        series: [{
+            type: 'spline',
+            name: 'avg score',
+            data: series_5,
+            zIndex: 1,
+            color: Highcharts.getOptions().colors[3],
+            tooltip: {
+                        valuePrefix: '# '
+                    }
+        },{
+
+            type: 'column',
+            name: 'score energy',
+            color: Highcharts.getOptions().colors[0],
+            data: series_2,
+
+        },{
+
+            type: 'column',
+            name: 'score melody',
+            color: Highcharts.getOptions().colors[1],
+            data: series_3,
+
+        },{
+            type: 'column',
+            name: 'score soul',
+            color: Highcharts.getOptions().colors[2],
+            data: series_4,
+        },
+    {
+        type: 'pie',
+        name: 'Total',
+        data: [{
+            name: 'Energy',
+            y: energy_total,
+            color: Highcharts.getOptions().colors[0]
+        }, {
+            name: 'Melody',
+            y: melody_total,
+            color: Highcharts.getOptions().colors[1]
+        }, {
+            name: 'Soul',
+            y: soul_total,
+            color: Highcharts.getOptions().colors[2]
+        }],
+        center: [100, 80],
+        size: 100,
+        showInLegend: false,
+        dataLabels: {
+            enabled: false
+        }
+    }
+
+        ]
+    });
+});
+
+
+    </script>
+
+
+
+
+  </head>
+  <body>
+    <div id="container"></div>
+<br><br><br>
+    <div id="container2" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
+<br><br><br>
+  </body>
+</html>
